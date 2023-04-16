@@ -1,3 +1,3 @@
 #! /bin/bash
 
-uvicorn src.main:app --reload
+docker run -it --rm --env-file .env mvkvc/wandb_server:latest

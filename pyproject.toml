@@ -10,6 +10,7 @@ python = "~3.10"
 wandb = "^0.14.2"
 fastapi = "^0.95.1"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
+python-dotenv = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]
