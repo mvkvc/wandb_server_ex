@@ -2,7 +2,7 @@
 
 Local W&B logging server along with client for Elixir.
 
-Current MNIST example project at: https://wandb.ai/mvkvc/mnisttest?workspace=user-mvkvc.
+Current MNIST example project at: <https://wandb.ai/mvkvc/mnisttest?workspace=user-mvkvc>.
 
 ## Usage
 
@@ -18,30 +18,9 @@ Add the client to your project:
   defp deps do
     [
         # ...
-        {:wandb_server_ex, git: "https://github.com/mvkvc/wandb_server/elixir"}
+        {:wandb_server_ex, path: "../wandb_server_ex"},
     ]
   end
 ```
 
-Add the following code to your Axon training code similar to the following:
-
-```elixir
-WandbServerEx.init(@config, "mnisttest")
-# ...
-def wandb_handler(%Axon.Loop.State{} = state) do
-    WandbServerEx.log(state.metrics)
-    {:continue, state}
-end
-# ...
-defp train_model(model, train_images, train_labels, epochs) do
-    model
-    |> Axon.Loop.trainer(:categorical_cross_entropy, Axon.Optimizers.adamw(@config.lr))
-    |> Axon.Loop.metric(:accuracy, "Accuracy")
-    # !!!
-    |> Axon.Loop.handle_event(:epoch_completed, &wandb_handler/1)
-    # !!!
-    |> Axon.Loop.run(Stream.zip(train_images, train_labels), %{}, epochs: epochs, compiler: EXLA)
-end
-# ...
-WandbServerEx.finish()
-```
+See the example file `examples/mnist.exs` for the example associated with the above project.

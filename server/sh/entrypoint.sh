@@ -13,4 +13,4 @@ else
     PORT=$WANDB_PORT
 fi
 
-uvicorn src.main:app --port "$PORT"
+uvicorn src.main:app --port "$PORT" --timeout-keep-alive 60 --host 0.0.0.0

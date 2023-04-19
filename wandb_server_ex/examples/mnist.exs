@@ -11,7 +11,11 @@ Mix.install([
 defmodule Mnist do
   require Axon
 
-  @config %{batch_size: 32, epochs: 5, lr: 0.005}
+  @params %{
+    "lr" => [0.1, 0.01, 0.001],
+    "batch_size" => [16, 32, 64],
+    "epochs" => [5, 10, 15]
+  }
 
   def wandb_handler(%Axon.Loop.State{} = state) do
     out =
@@ -23,22 +27,22 @@ defmodule Mnist do
     {:continue, state}
   end
 
-  defp transform_images({bin, type, shape}) do
+  defp transform_images({bin, type, shape}, params) do
     bin
     |> Nx.from_binary(type)
     |> Nx.reshape({elem(shape, 0), 784})
     |> Nx.divide(255.0)
-    |> Nx.to_batched(@config.batch_size)
+    |> Nx.to_batched(params[:batch_size])
     # Test split
     |> Enum.split(1750)
   end
 
-  defp transform_labels({bin, type, _}) do
+  defp transform_labels({bin, type, _}, params) do
     bin
     |> Nx.from_binary(type)
     |> Nx.new_axis(-1)
     |> Nx.equal(Nx.tensor(Enum.to_list(0..9)))
-    |> Nx.to_batched(@config.batch_size)
+    |> Nx.to_batched(params[:batch_size])
     # Test split
     |> Enum.split(1750)
   end
@@ -50,12 +54,16 @@ defmodule Mnist do
     |> Axon.dense(10, activation: :softmax)
   end
 
-  defp train_model(model, train_images, train_labels, epochs) do
+  defp train_model(model, train_images, train_labels, params) do
     model
-    |> Axon.Loop.trainer(:categorical_cross_entropy, Axon.Optimizers.adamw(@config.lr))
+    |> Axon.Loop.trainer(:categorical_cross_entropy, Axon.Optimizers.adamw(params[:lr]))
     |> Axon.Loop.metric(:accuracy, "Accuracy")
     |> Axon.Loop.handle_event(:epoch_completed, &wandb_handler/1)
-    |> Axon.Loop.run(Stream.zip(train_images, train_labels), %{}, epochs: epochs, compiler: EXLA)
+    |> Axon.Loop.early_stop("Accuracy")
+    |> Axon.Loop.run(Stream.zip(train_images, train_labels), %{},
+      epochs: params[:epochs],
+      compiler: EXLA
+    )
   end
 
   defp test_model(model, model_state, test_images, test_labels) do
@@ -65,23 +73,19 @@ defmodule Mnist do
     |> Axon.Loop.run(Stream.zip(test_images, test_labels), model_state, compiler: EXLA)
   end
 
-  def run do
+  def run(params) do
     {images, labels} = Scidata.MNIST.download()
 
-    {train_images, test_images} = transform_images(images)
-    {train_labels, test_labels} = transform_labels(labels)
+    {train_images, test_images} = transform_images(images, params)
+    {train_labels, test_labels} = transform_labels(labels, params)
 
     model = build_model({nil, 784}) |> IO.inspect()
 
     IO.write("\n\n Training Model \n\n")
 
-    WandbServerEx.init(@config, "mnisttest")
-
     model_state =
       model
-      |> train_model(train_images, train_labels, @config.epochs)
-
-    WandbServerEx.finish()
+      |> train_model(train_images, train_labels, params)
 
     IO.write("\n\n Testing Model \n\n")
 
@@ -90,6 +94,10 @@ defmodule Mnist do
 
     IO.write("\n\n")
   end
+
+  def grid_search() do
+    WandbServerEx.grid_search(@params, &run/1, "mnisttest")
+  end
 end
 
-Mnist.run()
+Mnist.grid_search()
