@@ -1,5 +1,7 @@
 # wandb_server
 
+Locally running fastapi server logging to W&B along with clients for non-supported languages.
+
 ## Usage
 
 Run the server in the background:
