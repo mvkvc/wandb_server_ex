@@ -1,4 +1,4 @@
-# # https://github.com/elixir-nx/axon/blob/efe1358a1566472af59a9bfed7eaa3e8423207fc/examples/vision/mnist.exs
+# https://github.com/elixir-nx/axon/blob/main/examples/vision/mnist.exs
 
 Mix.install([
   {:wandb_server_ex, path: "../wandb_server_ex"},
@@ -12,9 +12,9 @@ defmodule Mnist do
   require Axon
 
   @params %{
-    "lr" => [0.1, 0.01, 0.001],
-    "batch_size" => [16, 32, 64],
-    "epochs" => [5, 10, 15]
+    "lr" => [0.001, 0.005],
+    "batch_size" => [16, 32],
+    "epochs" => [5, 10]
   }
 
   def wandb_handler(%Axon.Loop.State{} = state) do
@@ -59,7 +59,6 @@ defmodule Mnist do
     |> Axon.Loop.trainer(:categorical_cross_entropy, Axon.Optimizers.adamw(params[:lr]))
     |> Axon.Loop.metric(:accuracy, "Accuracy")
     |> Axon.Loop.handle_event(:epoch_completed, &wandb_handler/1)
-    |> Axon.Loop.early_stop("Accuracy")
     |> Axon.Loop.run(Stream.zip(train_images, train_labels), %{},
       epochs: params[:epochs],
       compiler: EXLA
@@ -96,7 +95,11 @@ defmodule Mnist do
   end
 
   def grid_search() do
-    WandbServerEx.grid_search(@params, &run/1, "mnisttest")
+    try do
+      WandbServerEx.grid_search(@params, &run/1, "mnisttest")
+    after
+      WandbServerEx.finish()
+    end
   end
 end
 

@@ -2,45 +2,39 @@ defmodule WandbServerEx do
   def init(config, project, port \\ 5678, url \\ "http://127.0.0.1") do
     IO.puts("Initializing wandb run\n")
 
-    HTTPoison.post!(
-      "#{url}:#{port}/wandb/init",
-      Poison.encode!(%{"config" => keys_to_strings(config), "project" => project}),
-      [{"Content-Type", "application/json"}],
-      timeout: :infinity
-    )
+    url = url <> ":" <> to_string(port) <> "/wandb/init"
+    body = Poison.encode!(%{"config" => config, "project" => project})
+    headers = [{"Content-Type", "application/json"}]
+
+    HTTPoison.post!(url, body, headers, timeout: :infinity)
   end
 
   def log(metrics, step \\ nil, port \\ 5678, url \\ "http://127.0.0.1") do
-    out =
-      if step != nil do
-        %{"metrics" => metrics, "step" => step}
-      else
-        %{"metrics" => metrics}
-      end
+    url = url <> ":" <> to_string(port) <> "/wandb/log"
+    body = %{"metrics" => metrics}
+    body = if step != nil, do: Map.put(out, "step", step), else: out
+    body = Poison.encode!(body)
+    headers = [{"Content-Type", "application/json"}]
 
-    HTTPoison.post!(
-      "#{url}:#{port}/wandb/log",
-      Poison.encode!(out),
-      [{"Content-Type", "application/json"}],
-      timeout: :infinity
-    )
+    HTTPoison.post!(url, body, headers, timeout: :infinity)
   end
 
   def finish(port \\ 5678, url \\ "http://127.0.0.1") do
     IO.puts("Finishing wandb run\n")
 
-    HTTPoison.post!(
-      "#{url}:#{port}/wandb/finish",
-      Poison.encode!(%{}),
-      [{"Content-Type", "application/json"}],
-      timeout: :infinity
-    )
+    url = url <> ":" <> to_string(port) <> "/wandb/finish"
+    body = Poison.encode!(%{})
+    headers = [{"Content-Type", "application/json"}]
+
+    HTTPoison.post!(url, body, headers, timeout: :infinity)
   end
 
   def grid_search(params, run_fn, project) do
     grid = generate_grid(params)
 
-    Enum.map_with_index(grid, fn x, i ->
+    grid
+    |> Enum.with_index()
+    |> Enum.map(fn {x, i} ->
       IO.puts("Running grid item #{i + 1} of #{length(grid)}")
       WandbServerEx.init(x, project)
       run_fn.(x)
@@ -54,9 +48,5 @@ defmodule WandbServerEx do
         Enum.map(v, fn y -> [{String.to_atom(k), y} | x] end)
       end)
     end)
-  end
-
-  defp keys_to_strings(map) do
-    Enum.into(map, %{}, fn {k, v} -> {to_string(k), v} end)
   end
 end

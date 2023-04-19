@@ -18,6 +18,7 @@ class Log(BaseModel):
 
 @app.post("/wandb/init")
 def wandb_init(init: Init = Body(...)) -> dict[str, Any]:
+    response = {"success": True}
     if wandb.run:
         wandb.finish()
 
@@ -25,22 +26,25 @@ def wandb_init(init: Init = Body(...)) -> dict[str, Any]:
         project=init.project, notes=init.notes, tags=init.tags, config=init.config
     )
 
-    return {"success": True}
+    return response
 
 
 @app.post("/wandb/log")
 def wandb_log(log: Log = Body(...)) -> dict[str, Any]:
+    response = {"success": True}
     if not wandb.run:
-        return {"success": False, "error": "No run found"}
+        response["success"] = False
+        return response
 
     wandb.log(log.metrics, log.step)
-    return {"success": True}
+    return response
 
 
 @app.post("/wandb/finish")
 def wandb_finish() -> dict[str, Any]:
+    response = {"success": True}
     if not wandb.run:
-        return {"success": False, "error": "No run found"}
+        return response
 
     wandb.finish()
-    return {"success": True}
+    return response
