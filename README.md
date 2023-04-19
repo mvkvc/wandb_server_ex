@@ -2,6 +2,8 @@
 
 Locally running fastapi server logging to W&B along with clients for non-supported languages.
 
+Current MNIST example project at: https://wandb.ai/mvkvc/mnisttest/table?workspace=user-mvkvc.
+
 ## Usage
 
 Run the server in the background:
