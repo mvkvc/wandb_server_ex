@@ -1,7 +1,7 @@
 # # https://github.com/elixir-nx/axon/blob/efe1358a1566472af59a9bfed7eaa3e8423207fc/examples/vision/mnist.exs
 
 Mix.install([
-  {:wandb_server_ex, path: "../elixir"},
+  {:wandb_server_ex, path: "../wandb_server_ex"},
   {:axon, "~> 0.5"},
   {:exla, "~> 0.5"},
   {:nx, "~> 0.5"},
