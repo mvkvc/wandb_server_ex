@@ -1,4 +1,8 @@
-# wandb_server
+# wandb_server_ex
+
+Local W&B logging server along with client for Elixir.
+
+Current MNIST example project at: https://wandb.ai/mvkvc/mnisttest?workspace=user-mvkvc.
 
 ## Usage
 
