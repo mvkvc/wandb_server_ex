@@ -1,6 +1,6 @@
 # wandb_server
 
-Locally running fastapi server logging to W&B along with clients for non-supported languages.
+Local W&B logging server along with clients for non-supported languages. 
 
 Current MNIST example project at: https://wandb.ai/mvkvc/mnisttest?workspace=user-mvkvc.
 
