@@ -1,9 +1,5 @@
 #! /bin/bash
 
-set -a
-source .env
-set +a
-
 if [ -z "$WANDB_ENTITY" ] || [ "$WANDB_API_KEY" == "" ]; then
     echo $WANDB_ENTITY
     echo $WANDB_API_KEY
