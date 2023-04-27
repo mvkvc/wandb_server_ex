@@ -12,15 +12,4 @@ Run the server in the background (.env file expected to contain at least WANDB_E
 docker run -it --rm --env-file .env --network host mvkvc/wandb_server:latest
 ```
 
-Add the client to your project:
-
-```elixir
-  defp deps do
-    [
-        # ...
-        {:wandb_server_ex, path: "../wandb_server_ex"},
-    ]
-  end
-```
-
 See the example file `examples/mnist.exs` for the example associated with the above project.
