@@ -78,7 +78,7 @@ defmodule Mnist do
     {train_images, test_images} = transform_images(images, params)
     {train_labels, test_labels} = transform_labels(labels, params)
 
-    model = build_model({nil, 784}) |> IO.inspect()
+    model = build_model({nil, 784})
 
     IO.write("\n\n Training Model \n\n")
 

@@ -3,7 +3,7 @@ defmodule WandbServerEx do
     IO.puts("Initializing wandb run\n")
 
     url = url <> ":" <> to_string(port) <> "/wandb/init"
-    body = Poison.encode!(%{"config" => config, "project" => project})
+    body = Poison.encode!(%{"config" => atom_keys_to_str(config), "project" => project})
     headers = [{"Content-Type", "application/json"}]
 
     HTTPoison.post!(url, body, headers, timeout: :infinity)
@@ -12,7 +12,7 @@ defmodule WandbServerEx do
   def log(metrics, step \\ nil, port \\ 5678, url \\ "http://127.0.0.1") do
     url = url <> ":" <> to_string(port) <> "/wandb/log"
     body = %{"metrics" => metrics}
-    body = if step != nil, do: Map.put(out, "step", step), else: out
+    body = if step != nil, do: Map.put(body, "step", step), else: body
     body = Poison.encode!(body)
     headers = [{"Content-Type", "application/json"}]
 
@@ -48,5 +48,9 @@ defmodule WandbServerEx do
         Enum.map(v, fn y -> [{String.to_atom(k), y} | x] end)
       end)
     end)
+  end
+
+  def atom_keys_to_str(map) do
+    Enum.into(map, %{}, fn {k, v} -> {Atom.to_string(k), v} end)
   end
 end
