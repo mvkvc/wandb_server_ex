@@ -2,8 +2,11 @@ from fastapi import FastAPI, Body
 from pydantic import BaseModel
 from typing import Union, List, Any
 import wandb
+import os
+import requests
+from dotenv import load_dotenv
 
-app = FastAPI()
+load_dotenv()
 
 class Init(BaseModel):
     config: dict
@@ -15,6 +18,17 @@ class Init(BaseModel):
 class Log(BaseModel):
     metrics: dict
     step: Union[int, None] = None
+
+import certifi
+print(certifi.where())
+
+session = requests.Session()
+session.proxies = {
+   'http': 'http://127.0.0.1:8080',
+   'https': 'http://127.0.0.1:8080',
+}
+
+app = FastAPI()
 
 @app.post("/wandb/init")
 def wandb_init(init: Init = Body(...)) -> dict[str, Any]:

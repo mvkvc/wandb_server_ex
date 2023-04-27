@@ -1,5 +1,5 @@
 defmodule WandbServerEx do
-  def init(config, project, port \\ 5678, url \\ "http://127.0.0.1") do
+  def init(config, project, port \\ 5678, url \\ "http://0.0.0.0") do
     IO.puts("Initializing wandb run\n")
 
     url = url <> ":" <> to_string(port) <> "/wandb/init"
@@ -9,7 +9,7 @@ defmodule WandbServerEx do
     HTTPoison.post!(url, body, headers, timeout: :infinity)
   end
 
-  def log(metrics, step \\ nil, port \\ 5678, url \\ "http://127.0.0.1") do
+  def log(metrics, step \\ nil, port \\ 5678, url \\ "http://0.0.0.0") do
     url = url <> ":" <> to_string(port) <> "/wandb/log"
     body = %{"metrics" => metrics}
     body = if step != nil, do: Map.put(body, "step", step), else: body
@@ -19,7 +19,7 @@ defmodule WandbServerEx do
     HTTPoison.post!(url, body, headers, timeout: :infinity)
   end
 
-  def finish(port \\ 5678, url \\ "http://127.0.0.1") do
+  def finish(port \\ 5678, url \\ "http://0.0.0.0") do
     IO.puts("Finishing wandb run\n")
 
     url = url <> ":" <> to_string(port) <> "/wandb/finish"

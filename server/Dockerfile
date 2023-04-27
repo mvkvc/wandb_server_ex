@@ -1,13 +1,19 @@
 FROM python:3.10-slim-bullseye
 
-WORKDIR /opt
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y \
+    ca-certificates \
+    curl \
+    git
 
+WORKDIR /opt
 COPY sh sh/
 COPY src src/
-COPY mitmproxy-ca-cert.pem .
 COPY requirements.txt .
-
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip
+RUN python -m pip install install -r requirements.txt
+# COPY mitmproxy-ca-cert.pem mitmproxy-ca-cert.pem
+# Append to certifi.where location
 RUN chmod +x sh/entrypoint.sh
 
 CMD ["/opt/sh/entrypoint.sh"]

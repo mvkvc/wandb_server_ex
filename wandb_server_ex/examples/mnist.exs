@@ -95,11 +95,7 @@ defmodule Mnist do
   end
 
   def grid_search() do
-    try do
-      WandbServerEx.grid_search(@params, &run/1, "mnisttest")
-    after
-      WandbServerEx.finish()
-    end
+    WandbServerEx.grid_search(@params, &run/1, "mnisttest")
   end
 end
 
